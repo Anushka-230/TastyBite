@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* Quick Invert Dark Mode */
+html.dark {
+  background-color: #000;
+}
+html.dark body {
+  filter: invert(0.93) hue-rotate(180deg);
+  background-color: #f9fafb; /* Ensures light base before inversion */
+}
+html.dark img, html.dark video {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.dark .text-orange-500, html.dark .bg-orange-500, html.dark .border-orange-500 {
+  /* Prevent primary color from looking awful if possible */
+  filter: hue-rotate(-20deg) saturate(1.5); 
+}
