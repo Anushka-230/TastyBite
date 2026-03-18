@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { MdInventory, MdTrendingDown, MdErrorOutline, MdSearch, MdAdd, MdClose, MdKeyboardArrowDown } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
+import { api } from "../utils/api";
 
 const InventoryPage: React.FC = () => {
   const { inventoryItems: items, setInventoryItems: setItems } = useAppContext();
@@ -25,9 +26,14 @@ const InventoryPage: React.FC = () => {
   const lowStockCount = items.filter(item => item.status === "Low").length;
   const criticalCount = items.filter(item => item.status === "Critical").length;
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this inventory item?")) {
-      setItems(items.filter(item => item.id !== id));
+      try {
+        await api.delete('/inventory/delete.php', { id });
+        setItems(items.filter(item => item.id !== id));
+      } catch (err) {
+        alert("Failed to delete item from database");
+      }
     }
   };
 
@@ -60,43 +66,16 @@ const InventoryPage: React.FC = () => {
   };
 
   try {
-    let response;
-    let url;
-    let method;
-
     if (editingId) {
       // UPDATE (PUT)
-      url = "http://localhost/TastyBite/backend/api/inventory/update.php";
-      method = "PUT";
-      payload.id = editingId; // Add id for update
-    } else {
-      // CREATE (POST)
-      url = "http://localhost/TastyBite/backend/api/inventory/create.php";
-      method = "POST";
-    }
-
-    response = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Something went wrong");
-    }
-
-    // Update frontend state
-    if (editingId) {
-      // For update, construct updated item with backend's status
-      const updatedItem = { ...payload, status: data.status };
+      payload.id = editingId;
+      const data: any = await api.put('/inventory/update.php', payload);
+      const updatedItem = { ...payload, status: data.status || status };
       setItems(items.map(item => item.id === editingId ? updatedItem : item));
     } else {
-      // For create, construct new item with id and backend's status
-      const newItem = { ...payload, id: data.id, status: data.status };
+      // CREATE (POST)
+      const data: any = await api.post('/inventory/create.php', payload);
+      const newItem = { ...payload, id: data.id, status: data.status || status };
       setItems([...items, newItem]);
     }
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { MdSearch, MdAdd, MdEdit, MdDelete, MdClose, MdKeyboardArrowDown } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
+import { api } from "../utils/api";
 
 const MenuPage: React.FC = () => {
   const { menuItems: items, setMenuItems: setItems } = useAppContext();
@@ -35,15 +36,30 @@ const MenuPage: React.FC = () => {
   }, [items, searchQuery, selectedCategory]);
 
   // Actions
-  const handleToggleAvailable = (id: string) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, available: !item.available } : item
-    ));
+  const handleToggleAvailable = async (id: string) => {
+    const itemToUpdate = items.find(i => i.id === id);
+    if (!itemToUpdate) return;
+    
+    try {
+      const updatedItem = { ...itemToUpdate, available: !itemToUpdate.available ? 1 : 0 };
+      await api.put('/menu/update.php', updatedItem);
+      // Optimistic update
+      setItems(items.map(item => 
+        item.id === id ? { ...item, available: !item.available } : item
+      ));
+    } catch (err) {
+      alert("Failed to update availability");
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this menu item?")) {
-      setItems(items.filter(item => item.id !== id));
+      try {
+        await api.delete('/menu/delete.php', { id });
+        setItems(items.filter(item => item.id !== id));
+      } catch (err) {
+        alert("Failed to delete item");
+      }
     }
   };
 
@@ -73,7 +89,7 @@ const MenuPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || formData.category === "Select category" || !formData.price || !formData.prepTime) {
       alert("Please fill in all required fields.");
       return;
@@ -86,17 +102,22 @@ const MenuPage: React.FC = () => {
       category: formData.category,
       prepTime: `${formData.prepTime} min`,
       dietary: formData.dietary as "Veg" | "Non-Veg",
-      available: editingItem ? editingItem.available : true,
+      available: editingItem ? (editingItem.available ? 1 : 0) : 1,
       image: editingItem ? editingItem.image : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2000&auto=format&fit=crop", 
     };
 
-    if (editingItem) {
-      setItems(items.map(item => item.id === editingItem.id ? { ...itemPayload, id: item.id } as any : item));
-    } else {
-      setItems([...items, { ...itemPayload, id: Date.now().toString() } as any]);
+    try {
+      if (editingItem) {
+        await api.put('/menu/update.php', { ...itemPayload, id: editingItem.id });
+        setItems(items.map(item => item.id === editingItem.id ? { ...itemPayload, id: item.id } as any : item));
+      } else {
+        const res: any = await api.post('/menu/create.php', itemPayload);
+        setItems([...items, { ...itemPayload, id: res.id || Date.now().toString() } as any]);
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Failed to save menu item");
     }
-    
-    setIsModalOpen(false);
   };
 
   return (

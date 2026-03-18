@@ -1,15 +1,19 @@
 import React from "react";
 import { MdAccessTime, MdCheckCircle, MdErrorOutline } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
+import { api } from "../utils/api";
 
 const KitchenPage: React.FC = () => {
-  const { kitchenOrders, setKitchenOrders } = useAppContext();
+  const { kitchenOrders, refreshData } = useAppContext();
 
-  const handleStatusToggle = (id: string, currentStatus: string) => {
+  const handleStatusToggle = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === "Ready" ? "Preparing" : "Ready";
-    setKitchenOrders(kitchenOrders.map(order => 
-      order.id === id ? { ...order, status: newStatus } : order
-    ));
+    try {
+      await api.put('/orders/update.php', { id, status: newStatus });
+      await refreshData();
+    } catch (err) {
+      alert("Failed to update status.");
+    }
   };
   return (
     <div className="p-5 lg:p-8 space-y-6 overflow-y-auto">
@@ -104,7 +108,7 @@ const KitchenPage: React.FC = () => {
               )}
 
               <div className="flex-1 space-y-4 mb-6">
-                {order.items.map((item, idx) => (
+                {(order.itemsDetail || []).map((item: any, idx: number) => (
                   <div key={idx} className="flex flex-col">
                     <div className="flex items-start gap-3">
                       <span className="text-orange-500 font-bold w-6">{item.quantity}×</span>
