@@ -35,10 +35,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : initialTables;
   });
 
-  const [inventoryItems, setInventoryItems] = useState<any[]>(() => {
-    const saved = localStorage.getItem('tastybite_inventory');
-    return saved ? JSON.parse(saved) : initialInventory;
-  });
+  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
 
   const [kitchenOrders, setKitchenOrders] = useState<KitchenOrder[]>(() => {
     const saved = localStorage.getItem('tastybite_kitchen');
@@ -60,8 +57,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [tables]);
 
   useEffect(() => {
-    localStorage.setItem('tastybite_inventory', JSON.stringify(inventoryItems));
-  }, [inventoryItems]);
+  fetch("http://localhost/TastyBite/backend/api/inventory/read.php")
+    .then(res => res.json())
+    .then(data => {
+      setInventoryItems(data);
+    })
+    .catch(err => {
+      console.error("Error fetching inventory:", err);
+    });
+}, []);
 
   useEffect(() => {
     localStorage.setItem('tastybite_kitchen', JSON.stringify(kitchenOrders));
