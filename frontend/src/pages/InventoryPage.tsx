@@ -31,35 +31,76 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    if (!formData.name || formData.quantity === "" || formData.unit === "Select" || formData.minQty === "" || formData.category === "Select category") {
-      alert("Please fill in all fields.");
-      return;
-    }
+  const handleSave = async () => {
+  if (
+    !formData.name ||
+    formData.quantity === "" ||
+    formData.unit === "Select" ||
+    formData.minQty === "" ||
+    formData.category === "Select category"
+  ) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-    const qty = parseInt(formData.quantity);
-    const min = parseInt(formData.minQty);
-    let status: "Good" | "Low" | "Critical" = "Good";
-    
-    if (qty <= min / 2) status = "Critical";
-    else if (qty <= min) status = "Low";
+  const qty = parseInt(formData.quantity);
+  const min = parseInt(formData.minQty);
 
-    const newItem = {
-      id: editingId || Date.now().toString(),
-      name: formData.name,
-      category: formData.category,
-      quantity: qty,
-      unit: formData.unit,
-      minQty: min,
-      status: status
-    };
+  let status: "Good" | "Low" | "Critical" = "Good";
+  if (qty <= min / 2) status = "Critical";
+  else if (qty <= min) status = "Low";
+
+  const payload: any = {
+    name: formData.name,
+    category: formData.category,
+    quantity: qty,
+    unit: formData.unit,
+    minQty: min,
+    status: status
+  };
+
+  try {
+    let response;
+    let url;
+    let method;
 
     if (editingId) {
-      setItems(items.map(item => item.id === editingId ? newItem : item));
+      // UPDATE (PUT)
+      url = "http://localhost/TastyBite/backend/api/inventory/update.php";
+      method = "PUT";
+      payload.id = editingId; // Add id for update
     } else {
+      // CREATE (POST)
+      url = "http://localhost/TastyBite/backend/api/inventory/create.php";
+      method = "POST";
+    }
+
+    response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Something went wrong");
+    }
+
+    // Update frontend state
+    if (editingId) {
+      // For update, construct updated item with backend's status
+      const updatedItem = { ...payload, status: data.status };
+      setItems(items.map(item => item.id === editingId ? updatedItem : item));
+    } else {
+      // For create, construct new item with id and backend's status
+      const newItem = { ...payload, id: data.id, status: data.status };
       setItems([...items, newItem]);
     }
 
+    // Reset form
     setIsModalOpen(false);
     setEditingId(null);
     setFormData({
@@ -69,7 +110,12 @@ const InventoryPage: React.FC = () => {
       minQty: "",
       category: "Select category"
     });
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("Error saving item");
+  }
+};
 
   const handleEdit = (item: any) => {
     setFormData({
