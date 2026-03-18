@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MdPeople, MdAdd, MdClose, MdEdit, MdDelete } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
-import { useSignUp } from "@clerk/clerk-react";
+import { api } from "../utils/api";
 
 interface Employee {
   id: string;
@@ -17,7 +17,6 @@ interface Employee {
 const EmployeesPage: React.FC = () => {
   const { employees, setEmployees } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,10 +34,9 @@ const EmployeesPage: React.FC = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch("http://localhost:/TastyBite/backend/api/employees/read.php");
-      const data = await response.json();
-      if (data.data) {
-        setEmployees(data.data);
+      const result = await api.get<{ data: Employee[] }>('/employees/read.php');
+      if (result?.data) {
+        setEmployees(result.data);
       }
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -66,22 +64,14 @@ const EmployeesPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:/TastyBite/backend/api/employees/create.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...formData,
-          age: parseInt(formData.age),
-          salary: parseFloat(formData.salary)
-        })
+      const data = await api.post<{ id: string }>('/employees/create.php', {
+        ...formData,
+        age: parseInt(formData.age, 10),
+        salary: parseFloat(formData.salary),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
+      if (!data || !data.id) {
+        throw new Error('Something went wrong');
       }
 
       // Add new employee to state
@@ -95,7 +85,6 @@ const EmployeesPage: React.FC = () => {
 
       // Reset form
       setIsModalOpen(false);
-      setEditingId(null);
       setFormData({
         name: "",
         email: "",
@@ -113,7 +102,6 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleOpenNewModal = () => {
-    setEditingId(null);
     setFormData({
       name: "",
       email: "",

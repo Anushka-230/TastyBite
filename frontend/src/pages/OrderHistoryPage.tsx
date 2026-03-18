@@ -75,35 +75,8 @@ const OrderHistoryPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Daily Revenue Chart Area */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-900 mb-6">Daily Revenue</h2>
-        <div className="space-y-4">
-          {[
-            { date: "Feb 19", val: 2450, w: "55%" },
-            { date: "Feb 20", val: 2890, w: "65%" },
-            { date: "Feb 21", val: 3120, w: "72%" },
-            { date: "Feb 22", val: 2750, w: "62%" },
-            { date: "Feb 23", val: 3450, w: "80%" },
-            { date: "Feb 24", val: 3890, w: "90%" },
-            { date: "Feb 25", val: 4120, w: "100%" },
-          ].map((bar, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <span className="text-sm text-gray-500 w-12 shrink-0">{bar.date}</span>
-              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-orange-500 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: bar.w }}
-                />
-              </div>
-              <span className="text-sm font-bold text-gray-900 w-12 text-right shrink-0">${bar.val}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Order History Table */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-0 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white border border-gray-100 rounded-2xl p-0 shadow-sm overflow-hidden shrink-0">
         <div className="p-6 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">Order History</h2>
         </div>
@@ -147,6 +120,33 @@ const OrderHistoryPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Daily Revenue Chart Area */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-900 mb-6">Daily Revenue</h2>
+        <div className="space-y-4">
+          {[
+            { date: "Feb 19", val: 2450, w: "55%" },
+            { date: "Feb 20", val: 2890, w: "65%" },
+            { date: "Feb 21", val: 3120, w: "72%" },
+            { date: "Feb 22", val: 2750, w: "62%" },
+            { date: "Feb 23", val: 3450, w: "80%" },
+            { date: "Feb 24", val: 3890, w: "90%" },
+            { date: "Feb 25", val: 4120, w: "100%" },
+          ].map((bar, i) => (
+            <div key={i} className="flex items-center gap-4">
+              <span className="text-sm text-gray-500 w-12 shrink-0">{bar.date}</span>
+              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-orange-500 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: bar.w }}
+                />
+              </div>
+              <span className="text-sm font-bold text-gray-900 w-12 text-right shrink-0">${bar.val}</span>
+            </div>
+          ))}
         </div>
       </div>
 

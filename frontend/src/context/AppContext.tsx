@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  menuItems as initialMenuItems, 
-  tables as initialTables, 
-  inventoryItems as initialInventory, 
-  kitchenOrders as initialKitchen,
-  historicalOrders as initialHistorical
-} from '../data/dashboardData';
 import { MenuItem, Table, KitchenOrder, HistoricalOrder } from '../types';
+import { api } from '../utils/api';
 
 interface AppContextType {
   menuItems: MenuItem[];
@@ -21,63 +15,53 @@ interface AppContextType {
   setKitchenOrders: React.Dispatch<React.SetStateAction<KitchenOrder[]>>;
   historicalOrders: HistoricalOrder[];
   setHistoricalOrders: React.Dispatch<React.SetStateAction<HistoricalOrder[]>>;
+  refreshData: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize from LocalStorage or fallback to initial data
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
-    const saved = localStorage.getItem('tastybite_menu');
-    return saved ? JSON.parse(saved) : initialMenuItems;
-  });
-
-  const [tables, setTables] = useState<Table[]>(() => {
-    const saved = localStorage.getItem('tastybite_tables');
-    return saved ? JSON.parse(saved) : initialTables;
-  });
-
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [tables, setTables] = useState<Table[]>([]);
   const [inventoryItems, setInventoryItems] = useState<any[]>([]);
-
   const [employees, setEmployees] = useState<any[]>([]);
+  const [kitchenOrders, setKitchenOrders] = useState<KitchenOrder[]>([]);
+  const [historicalOrders, setHistoricalOrders] = useState<HistoricalOrder[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [kitchenOrders, setKitchenOrders] = useState<KitchenOrder[]>(() => {
-    const saved = localStorage.getItem('tastybite_kitchen');
-    return saved ? JSON.parse(saved) : initialKitchen;
-  });
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const [menuRes, tablesRes, inventoryRes, employeesRes, ordersRes] = await Promise.all([
+        api.get<MenuItem[]>('/menu/read.php').catch(() => []),
+        api.get<Table[]>('/tables/read.php').catch(() => []),
+        api.get<any[]>('/inventory/read.php').catch(() => []),
+        api.get<any[]>('/employees/read.php').catch(() => []),
+        api.get<any[]>('/orders/read.php').catch(() => []),
+      ]);
 
-  const [historicalOrders, setHistoricalOrders] = useState<HistoricalOrder[]>(() => {
-    const saved = localStorage.getItem('tastybite_historical');
-    return saved ? JSON.parse(saved) : initialHistorical;
-  });
+      setMenuItems(menuRes || []);
+      setTables(tablesRes || []);
+      setInventoryItems(inventoryRes || []);
+      setEmployees((employeesRes as any)?.data || []);
 
-  // Save to LocalStorage whenever state changes
-  useEffect(() => {
-    localStorage.setItem('tastybite_menu', JSON.stringify(menuItems));
-  }, [menuItems]);
-
-  useEffect(() => {
-    localStorage.setItem('tastybite_tables', JSON.stringify(tables));
-  }, [tables]);
-
-  useEffect(() => {
-  fetch("http://localhost/TastyBite/backend/api/inventory/read.php")
-    .then(res => res.json())
-    .then(data => {
-      setInventoryItems(data);
-    })
-    .catch(err => {
-      console.error("Error fetching inventory:", err);
-    });
-}, []);
-
-  useEffect(() => {
-    localStorage.setItem('tastybite_kitchen', JSON.stringify(kitchenOrders));
-  }, [kitchenOrders]);
+      // Parse Orders into Kitchen and Historical
+      const activeOrders = ordersRes.filter((o: any) => o.status !== 'Completed' && o.status !== 'Cancelled');
+      const histOrders = ordersRes; // Order history shows all orders
+      
+      setKitchenOrders(activeOrders as KitchenOrder[]);
+      setHistoricalOrders(histOrders as HistoricalOrder[]);
+    } catch (err) {
+      console.error("Failed to refresh data", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem('tastybite_historical', JSON.stringify(historicalOrders));
-  }, [historicalOrders]);
+    refreshData();
+  }, []);
 
   return (
     <AppContext.Provider 
@@ -87,7 +71,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         inventoryItems, setInventoryItems,
         employees, setEmployees,
         kitchenOrders, setKitchenOrders,
-        historicalOrders, setHistoricalOrders
+        historicalOrders, setHistoricalOrders,
+        refreshData,
+        isLoading
       }}
     >
       {children}

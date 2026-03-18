@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { MdPeopleOutline, MdClose, MdVisibility, MdQrCodeScanner } from "react-icons/md";
 import type { Table } from "../types";
+import { api } from "../utils/api";
 
 interface TablesPageProps {
   onNavigate?: (page: string) => void;
@@ -16,11 +17,16 @@ const TablesPage: React.FC<TablesPageProps> = ({ onNavigate }) => {
   const occupiedTables = tablesList.filter((t) => t.status === "Occupied").length;
   const reservedTables = tablesList.filter((t) => t.status === "Reserved").length;
 
-  const handleStatusChange = (newStatus: "Free" | "Occupied" | "Reserved") => {
+  const handleStatusChange = async (newStatus: "Free" | "Occupied" | "Reserved") => {
     if (!selectedTable) return;
-    const updatedTable = { ...selectedTable, status: newStatus };
-    setTablesList(tablesList.map(t => t.id === selectedTable.id ? updatedTable : t));
-    setSelectedTable(updatedTable);
+    try {
+      const updatedTable = { ...selectedTable, status: newStatus };
+      await api.put('/tables/update.php', updatedTable);
+      setTablesList(tablesList.map(t => t.id === selectedTable.id ? updatedTable : t));
+      setSelectedTable(updatedTable);
+    } catch (err) {
+      alert("Failed to update table status");
+    }
   };
 
   const handleViewOrder = () => {

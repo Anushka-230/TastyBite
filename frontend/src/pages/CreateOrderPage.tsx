@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { MdSearch, MdShoppingCart, MdKeyboardArrowDown, MdCheck, MdDeleteOutline, MdAdd, MdRemove } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
 import { MenuItem, Table, KitchenOrder, HistoricalOrder } from "../types";
+import { api } from "../utils/api";
 
 const categories = ["All", "Pizza", "Main Course", "Salads", "Pasta", "Burgers", "Desserts", "Beverages", "Appetizers"];
 
@@ -19,7 +20,7 @@ const CreateOrderPage: React.FC = () => {
 
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const { menuItems, tables: allTables, setTables, kitchenOrders, setKitchenOrders, historicalOrders, setHistoricalOrders } = useAppContext();
+  const { menuItems, tables: allTables, refreshData } = useAppContext();
 
   const tableDropdownRef = useRef<HTMLDivElement>(null);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -78,7 +79,7 @@ const CreateOrderPage: React.FC = () => {
   const total = subtotal + tax;
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     if (!selectedTable) {
       alert("Please select a table to submit the order.");
       return;
@@ -88,43 +89,34 @@ const CreateOrderPage: React.FC = () => {
       return;
     }
 
-    const orderId = `ORD-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-    const now = new Date();
+    try {
+      const payload = {
+        table_id: selectedTable.id,
+        waiter: "System Default", // Can be dynamic if we implement user auth later
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        items: cart.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          note: "" // Could be added in UI later
+        }))
+      };
 
-    // 1. Update Table Status
-    setTables(allTables.map(t => t.id === selectedTable.id ? { ...t, status: "Occupied" } : t));
+      const res: any = await api.post('/orders/create.php', payload);
+      
+      // Update the table status on backend
+      await api.put('/tables/update.php', { ...selectedTable, status: "Occupied" });
 
-    // 2. Add to Kitchen Orders
-    const newKitchenOrder: KitchenOrder = {
-      id: orderId.replace('ORD-', ''),
-      table: selectedTable.number,
-      status: "Preparing",
-      waitTime: "0 min",
-      items: cart.map(item => ({
-        quantity: item.quantity,
-        name: item.name,
-        dietary: item.dietary,
-      }))
-    };
-    setKitchenOrders([...kitchenOrders, newKitchenOrder]);
+      // Refresh global context data to pull the latest orders and table statuses
+      await refreshData();
 
-    // 3. Add to Historical Orders
-    const newHistoricalOrder: HistoricalOrder = {
-      id: orderId,
-      table: `Table ${selectedTable.number}`,
-      waiter: "System",
-      date: now.toLocaleDateString(),
-      time: now.toLocaleTimeString(),
-      items: totalItems,
-      status: "Preparing",
-      amount: total,
-    };
-    setHistoricalOrders([newHistoricalOrder, ...historicalOrders]);
-
-    // Cleanup
-    alert(`Order ${orderId} submitted successfully!`);
-    setCart([]);
-    setSelectedTable(null);
+      alert(`Order ${res.id} submitted successfully!`);
+      setCart([]);
+      setSelectedTable(null);
+    } catch (error) {
+      alert("Failed to submit order. Please try again.");
+    }
   };
 
   return (

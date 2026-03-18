@@ -71,7 +71,8 @@ export interface KitchenOrder {
   table: number;
   status: "Preparing" | "Ready" | "Delayed";
   waitTime: string;
-  items: {
+  items: number;
+  itemsDetail?: {
     quantity: number;
     name: string;
     dietary?: "Veg" | "Non-Veg";
