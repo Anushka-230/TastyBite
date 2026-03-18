@@ -17,6 +17,7 @@ export const navItems: NavItem[] = [
   { id: "kitchen", label: "Kitchen", icon: "kitchen", href: "/kitchen" },
   { id: "billing", label: "Billing", icon: "billing", href: "/billing" },
   { id: "inventory", label: "Inventory", icon: "inventory", href: "/inventory" },
+  { id: "employees", label: "Employees", icon: "employees", href: "/employees" },
   { id: "order-history", label: "Order History", icon: "history", href: "/order-history" },
 ];
 

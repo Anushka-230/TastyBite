@@ -15,6 +15,8 @@ interface AppContextType {
   setTables: React.Dispatch<React.SetStateAction<Table[]>>;
   inventoryItems: any[];
   setInventoryItems: React.Dispatch<React.SetStateAction<any[]>>;
+  employees: any[];
+  setEmployees: React.Dispatch<React.SetStateAction<any[]>>;
   kitchenOrders: KitchenOrder[];
   setKitchenOrders: React.Dispatch<React.SetStateAction<KitchenOrder[]>>;
   historicalOrders: HistoricalOrder[];
@@ -36,6 +38,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [inventoryItems, setInventoryItems] = useState<any[]>([]);
+
+  const [employees, setEmployees] = useState<any[]>([]);
 
   const [kitchenOrders, setKitchenOrders] = useState<KitchenOrder[]>(() => {
     const saved = localStorage.getItem('tastybite_kitchen');
@@ -81,6 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         menuItems, setMenuItems, 
         tables, setTables, 
         inventoryItems, setInventoryItems,
+        employees, setEmployees,
         kitchenOrders, setKitchenOrders,
         historicalOrders, setHistoricalOrders
       }}

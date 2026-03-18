@@ -153,3 +153,31 @@ INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `quantity`, `note`)
 (6, 'ORD-003', 'm3', 1, 'Dressing on the side'),
 (7, 'ORD-004', 'm5', 1, NULL),
 (8, 'ORD-004', 'm6', 2, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `role` enum('Admin','Waiter','Chef') NOT NULL DEFAULT 'Waiter',
+  `age` int(11) DEFAULT NULL,
+  `date_of_joining` date DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `age`, `date_of_joining`, `salary`, `created_at`) VALUES
+(1, 'Admin User', 'admin@tastybite.com', '$2y$10$hashedpassword1', 'Admin', 35, '2020-01-15', 50000.00, '2026-03-18 10:00:00'),
+(2, 'John Smith', 'john@tastybite.com', '$2y$10$hashedpassword2', 'Waiter', 28, '2022-05-10', 25000.00, '2026-03-18 10:00:00'),
+(3, 'Sarah Johnson', 'sarah@tastybite.com', '$2y$10$hashedpassword3', 'Waiter', 26, '2023-02-20', 24000.00, '2026-03-18 10:00:00'),
+(4, 'Mike Davis', 'mike@tastybite.com', '$2y$10$hashedpassword4', 'Chef', 42, '2019-08-05', 45000.00, '2026-03-18 10:00:00'),
+(5, 'Emily Chen', 'emily@tastybite.com', '$2y$10$hashedpassword5', 'Chef', 30, '2021-11-12', 35000.00, '2026-03-18 10:00:00');

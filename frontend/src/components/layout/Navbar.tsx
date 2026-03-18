@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MdMenu, MdDarkMode, MdLightMode, MdNotifications, MdCheckCircle } from "react-icons/md";
+import { MdMenu, MdDarkMode, MdLightMode, MdNotifications, MdCheckCircle, MdLogout } from "react-icons/md";
+import { useClerk } from "@clerk/clerk-react";
 import type { NavbarProps } from "../../types";
 
 const Navbar: React.FC<NavbarProps & { title?: string }> = ({
   onMenuToggle,
   title = "Dashboard",
 }) => {
+  const { signOut } = useClerk();
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -41,6 +43,10 @@ const Navbar: React.FC<NavbarProps & { title?: string }> = ({
     } else {
       document.documentElement.classList.remove("dark");
     }
+  };
+
+  const handleLogout = () => {
+    signOut();
   };
 
   return (
@@ -113,6 +119,13 @@ const Navbar: React.FC<NavbarProps & { title?: string }> = ({
 
         {/* Avatar */}
         <div className="flex items-center gap-2 ml-1 pl-2 border-l border-gray-100">
+          <button 
+            onClick={handleLogout}
+            className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors duration-200"
+            title="Logout"
+          >
+            <MdLogout size={20} />
+          </button>
           <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-bold">AU</span>
           </div>
