@@ -1,5 +1,5 @@
 import React from "react";
-import { MdAccessTime, MdCheckCircle, MdErrorOutline } from "react-icons/md";
+import { MdAccessTime, MdCheckCircle } from "react-icons/md";
 import { useAppContext } from "../context/AppContext";
 import { api } from "../utils/api";
 
@@ -18,7 +18,7 @@ const KitchenPage: React.FC = () => {
   return (
     <div className="p-5 lg:p-8 space-y-6 overflow-y-auto">
       {/* Stats Header */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
           <div>
             <p className="text-gray-500 text-sm font-medium mb-1">Preparing</p>
@@ -41,17 +41,7 @@ const KitchenPage: React.FC = () => {
             <MdCheckCircle size={24} />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div>
-            <p className="text-gray-500 text-sm font-medium mb-1">Delayed</p>
-            <p className="text-3xl font-bold text-red-600">
-              {kitchenOrders.filter(o => o.status === "Delayed").length}
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-            <MdErrorOutline size={24} />
-          </div>
-        </div>
+      
       </div>
 
       {/* Orders Grid */}
@@ -84,28 +74,13 @@ const KitchenPage: React.FC = () => {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-2xl font-black text-gray-900 leading-none mb-1">#{order.id}</h3>
-                  <p className="text-sm text-gray-500 font-medium">Table {order.table}</p>
+                  <p className="text-sm text-gray-500 font-medium">{order.table}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${statusBg} ${statusText}`}>
                   {order.status === "Delayed" ? "Preparing" : order.status}
                 </span>
               </div>
 
-              {order.status === "Delayed" && (
-                <div className="flex justify-between items-center bg-red-50 text-red-700 px-4 py-2.5 rounded-xl mb-6">
-                  <div className="flex items-center gap-2 font-medium text-sm">
-                    <MdAccessTime size={18} /> {order.waitTime}
-                  </div>
-                  <span className="px-2 py-0.5 bg-red-600 text-white rounded-full text-[10px] font-bold">Delayed</span>
-                </div>
-              )}
-              {order.status !== "Delayed" && (
-                <div className="flex justify-between items-center bg-gray-50 text-gray-600 px-4 py-2.5 rounded-xl mb-6">
-                  <div className="flex items-center gap-2 font-medium text-sm">
-                    <MdAccessTime size={18} /> {order.waitTime}
-                  </div>
-                </div>
-              )}
 
               <div className="flex-1 space-y-4 mb-6">
                 {(order.itemsDetail || []).map((item: any, idx: number) => (

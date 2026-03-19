@@ -6,6 +6,7 @@ export interface NavItem {
   badge?: number;
 }
 
+//dashboard
 export interface StatCard {
   id: string;
   title: string;
@@ -14,20 +15,17 @@ export interface StatCard {
   changeType: "positive" | "negative" | "neutral";
   icon: "dollar" | "cart" | "users" | "trending";
 }
-
 export interface WeeklySalesData {
   date: string;
   revenue: number;
   orders: number;
 }
-
 export interface TopDish {
   rank: number;
   name: string;
   orders: number;
   revenue: number;
 }
-
 export interface OrderDistribution {
   name: string;
   value: number;
@@ -117,6 +115,7 @@ export interface InventoryItem {
   status: "Good" | "Low" | "Critical";
 }
 
+//dashboard
 export interface HistoricalOrder {
   id: string;
   table: string;

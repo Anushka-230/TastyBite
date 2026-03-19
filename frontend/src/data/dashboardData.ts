@@ -25,7 +25,7 @@ export const statCards: StatCard[] = [
   {
     id: "revenue",
     title: "Today's Revenue",
-    value: "$4,120.50",
+    value: "₹4,120.50",
     change: "+12.5% from yesterday",
     changeType: "positive",
     icon: "dollar",
@@ -49,7 +49,7 @@ export const statCards: StatCard[] = [
   {
     id: "avg-order",
     title: "Avg. Order Value",
-    value: "$52.83",
+    value: "₹52.83",
     change: "+5.2% from last week",
     changeType: "positive",
     icon: "trending",
@@ -139,7 +139,8 @@ export const kitchenOrders: KitchenOrder[] = [
     table: 1,
     status: "Delayed",
     waitTime: "441 min",
-    items: [
+    items: 1,
+    itemsDetail: [
       { quantity: 2, name: "Margherita Pizza", dietary: "Veg", note: "Extra cheese" },
       { quantity: 2, name: "Fresh Orange Juice", dietary: "Veg" },
     ],
@@ -149,7 +150,8 @@ export const kitchenOrders: KitchenOrder[] = [
     table: 4,
     status: "Delayed",
     waitTime: "451 min",
-    items: [
+    items: 2,
+    itemsDetail: [
       { quantity: 3, name: "Chicken Tikka Masala", dietary: "Non-Veg" },
       { quantity: 1, name: "Vegetable Pasta", dietary: "Veg" },
     ],
@@ -159,7 +161,8 @@ export const kitchenOrders: KitchenOrder[] = [
     table: 7,
     status: "Ready",
     waitTime: "461 min",
-    items: [
+    items: 2,
+    itemsDetail: [
       { quantity: 4, name: "Grilled Salmon", dietary: "Non-Veg" },
     ],
   },
