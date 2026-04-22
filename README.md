@@ -40,7 +40,7 @@ TastyBite is a comprehensive, full-stack restaurant management dashboard designe
 1. **Clone the repository**
 
 ```bash
-git clone [https://github.com/your-username/TastyBite.git](https://github.com/Anushka-230/TastyBite.git)
+git clone https://github.com/Anushka-230/TastyBite.git
 cd TastyBite
 ```
 
